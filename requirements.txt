@@ -2,7 +2,7 @@ transformers
 Pillow
 # torch
 streamlit
-os
+# os
 
 # uvicorn
 # fastapi
