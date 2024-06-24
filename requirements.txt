@@ -1,13 +1,13 @@
 transformers
 Pillow
-# torch
+torch
 streamlit
 # os
 
-# uvicorn
-# fastapi
-# fastapi.responses
+uvicorn
+fastapi
+fastapi.responses
 #  fastAPI run command : uvicorn app:app --reload
 
-flask
+# flask
 # run command: python app.py
