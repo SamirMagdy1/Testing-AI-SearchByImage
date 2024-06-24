@@ -1,29 +1,39 @@
-import streamlit as st
+from flask import Flask, request, jsonify
 from transformers import ViTImageProcessor, ViTForImageClassification
 from PIL import Image
 import torch
+import io
 
+app = Flask(__name__)
+
+# Load the model and processor
 processor = ViTImageProcessor.from_pretrained('google/vit-base-patch16-224')
 model = ViTForImageClassification.from_pretrained('google/vit-base-patch16-224')
 
-st.title("Image Classification with ViT")
+@app.route('/upload', methods=['POST'])
+def upload_image():
+    if 'image' not in request.files:
+        return jsonify({"error": "No image file found"}), 400
 
-uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
+    file = request.files['image']
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
 
-if uploaded_file is not None:
-    image = Image.open(uploaded_file)
+    try:
+        image = Image.open(io.BytesIO(file.read()))
 
-    st.image(image, caption='Uploaded Image', use_column_width=True)
+        # Preprocess the image and make prediction
+        inputs = processor(images=image, return_tensors="pt")
+        outputs = model(**inputs)
+        logits = outputs.logits
 
-    inputs = processor(images=image, return_tensors="pt")
-    outputs = model(**inputs)
-    logits = outputs.logits
+        predicted_class_idx = logits.argmax(-1).item()
+        predicted_class_label = model.config.id2label[predicted_class_idx]
 
-    predicted_class_idx = logits.argmax(-1).item()
-    predicted_class_label = model.config.id2label[predicted_class_idx]
+        return jsonify({"predicted_class": predicted_class_label}), 200
 
-    st.write(f"Predicted class: {predicted_class_label}")
-
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    st.write("Upload an image to classify")
+    app.run(debug=True)
