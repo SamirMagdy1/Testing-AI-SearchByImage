@@ -1,13 +1,18 @@
-transformers
-Pillow
-torch
-streamlit
+# transformers
+# Pillow
+# torch
+# streamlit
 # os
 
-uvicorn
-fastapi
-fastapi.responses
+# uvicorn
+# fastapi
+# fastapi.responses
 #  fastAPI run command : uvicorn app:app --reload
+# fastAPI run command: uvicorn main:app --host 0.0.0.0 --port: 8000
 
-# flask
+flask
+google.cloud
+io
 # run command: python app.py
+
+# streamlit run app.py
