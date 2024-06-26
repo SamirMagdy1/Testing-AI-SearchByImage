@@ -12,7 +12,7 @@
 
 # flask==3.0.3
 google-cloud==0.34.0
-io=3.3
+# io=3.3
 flask==2.1.1
 # SpeechRecognition==3.8.1
 # run command: python app.py
