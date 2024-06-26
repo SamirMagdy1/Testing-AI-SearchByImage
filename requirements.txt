@@ -11,7 +11,7 @@ transformers
 # fastAPI run command: uvicorn main:app --host 0.0.0.0 --port: 8000
 
 # flask==3.0.3
-google-cloud==0.34.0
+# google-cloud==0.34.0
 # io=3.3
 flask==2.1.1
 # SpeechRecognition==3.8.1
