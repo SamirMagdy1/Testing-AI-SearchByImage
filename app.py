@@ -4,7 +4,7 @@ import io
 
 app = Flask(__name__)
 
-# قم بإعداد عميل Google Cloud Vision
+# ظ‚ظ… ط¨ط¥ط¹ط¯ط§ط¯ ط¹ظ…ظٹظ„ Google Cloud Vision
 client = vision.ImageAnnotatorClient()
 
 @app.route('/')
@@ -19,13 +19,15 @@ def search_by_image():
     image_file = request.files['image']
     image_content = image_file.read()
     
-    image = vision.Image(content=image_content)
+    # Use io.BytesIO to handle image content
+    image_stream = io.BytesIO(image_content)
+    image = vision.Image(content=image_stream.read())
     
-    # طلب البحث باستخدام الصورة
+    # ط·ظ„ط¨ ط§ظ„ط¨ط­ط« ط¨ط§ط³طھط®ط¯ط§ظ… ط§ظ„طµظˆط±ط©
     response = client.label_detection(image=image)
     labels = response.label_annotations
     
-    # استخراج الوصوفات والتصنيفات
+    # ط§ط³طھط®ط±ط§ط¬ ط§ظ„ظˆطµظˆظپط§طھ ظˆط§ظ„طھطµظ†ظٹظپط§طھ
     descriptions = [label.description for label in labels]
     
     return jsonify({'labels': descriptions})
