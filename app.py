@@ -1,36 +1,42 @@
 from flask import Flask, request, jsonify
-from google.cloud import vision
+from transformers import ViTImageProcessor, ViTForImageClassification
+from PIL import Image
+# import torch
 import io
+import os
 
 app = Flask(__name__)
 
-# ظ‚ظ… ط¨ط¥ط¹ط¯ط§ط¯ ط¹ظ…ظٹظ„ Google Cloud Vision
-client = vision.ImageAnnotatorClient()
+# Load the model and processor
+processor = ViTImageProcessor.from_pretrained('google/vit-base-patch16-224')
+model = ViTForImageClassification.from_pretrained('google/vit-base-patch16-224')
 
-@app.route('/')
-def index():
-    return 'Welcome to the Image Search API!'
-
-@app.route('/search-by-image', methods=['POST'])
-def search_by_image():
+@app.route('/upload', methods=['POST'])
+def upload_image():
     if 'image' not in request.files:
-        return jsonify({'error': 'No image file provided'}), 400
-    
-    image_file = request.files['image']
-    image_content = image_file.read()
-    
-    # Use io.BytesIO to handle image content
-    image_stream = io.BytesIO(image_content)
-    image = vision.Image(content=image_stream.read())
-    
-    # ط·ظ„ط¨ ط§ظ„ط¨ط­ط« ط¨ط§ط³طھط®ط¯ط§ظ… ط§ظ„طµظˆط±ط©
-    response = client.label_detection(image=image)
-    labels = response.label_annotations
-    
-    # ط§ط³طھط®ط±ط§ط¬ ط§ظ„ظˆطµظˆظپط§طھ ظˆط§ظ„طھطµظ†ظٹظپط§طھ
-    descriptions = [label.description for label in labels]
-    
-    return jsonify({'labels': descriptions})
+        return jsonify({"error": "No image file found"}), 400
+
+    file = request.files['image']
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+
+    try:
+        image = Image.open(io.BytesIO(file.read()))
+
+        # Preprocess the image and make prediction
+        inputs = processor(images=image, return_tensors="pt")
+        outputs = model(**inputs)
+        logits = outputs.logits
+
+        predicted_class_idx = logits.argmax(-1).item()
+        predicted_class_label = model.config.id2label[predicted_class_idx]
+
+        return jsonify({"predicted_class": predicted_class_label}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
+    app.run(debug=True)
